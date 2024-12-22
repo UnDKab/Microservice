@@ -1,22 +1,22 @@
-# Stage 1: Builder
-FROM python:3.10-slim AS builder
+
+FROM python:3.10-slim
+
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Stage 2: Runtime
-FROM python:3.10-slim
-WORKDIR /app
-COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
-COPY app ./app
 
-# Установка flask как глобального пакета
-RUN pip install flask==2.2.3
+COPY . .
 
-# Проверка наличия flask в $PATH
-RUN echo $PATH
 
-ENV PATH="/usr/local/bin:$PATH"  
-ENV FLASK_APP=app.main
-CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]
+EXPOSE 5000
 
+
+CMD ["python", "app.py"]
